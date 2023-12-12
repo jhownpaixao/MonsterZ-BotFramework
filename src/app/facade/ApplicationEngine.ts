@@ -41,8 +41,8 @@ class ApplicationEngine extends Client {
     Console.log(`[🚀]:: Realizando login...`, "warning");
     await this.login(this.accessToken);
     await this.initializeBots();
-    await this.loadCommands();
     await this.loadEventsHandles();
+    await this.loadCommands();
 
     Console.log(`Comandos carregados: ${this.commands.length}`, "info");
     console.log(
@@ -65,7 +65,9 @@ class ApplicationEngine extends Client {
     }
   }
   private async importCommandsToGuild() {
+    console.log("sss", this.commands);
     const api = new REST({ version: "9" }).setToken(this.accessToken);
+
     const commands = this.commands.map((command) => ({
       name: command.metadata.shortcut,
       description: command.metadata.descriptions,
@@ -97,7 +99,10 @@ class ApplicationEngine extends Client {
     }
   }
   private initializeNativeEvents() {
-    this.once("ready", () => this.importCommandsToGuild());
+    this.on("ready", () => {
+      console.log("ready");
+    });
+    this.importCommandsToGuild();
     this.on("interactionCreate", (interaction) => {
       if (interaction.isCommand()) {
         const commmand = this.commands.find(

@@ -26,10 +26,10 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
   private events: EventHandler[] = [];
   private client: Client;
   private variables = {
-    baseRecordCategory: "1180687879748472872",
-    baseRegistrationChannel: "1180927078439325716",
-    baseRecordResultChannel: "1180688084510199900",
-    baseRecordEvaluationChannel: "1180927078439325716",
+    baseRecordCategory: "1180687879748472872", // Categoria onde será criado o canal da solicitação
+    baseRegistrationChannel: "1180688039962492969", //Canal para o usuário solicitar o registro
+    baseRecordResultChannel: "1184113588391120896", // Canal que receberá os resultados de registro
+    baseRecordEvaluationChannel: "1184113497446031410", //Canal para aprovação pelos admins
   };
 
   private resultChannel: TextChannel;
@@ -151,6 +151,10 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
           {
             name: "**Informações Adicionais:**",
             value: msg.content || "**Sem informações**",
+          },
+          {
+            name: "**Solicitante:**",
+            value: `<@${interaction.user.id}>`,
           },
         ],
       });
@@ -342,7 +346,7 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
     // ?Registrar comandos
     this.commands.push({
       metadata: {
-        shortcut: "start-base-register",
+        shortcut: "registro-base",
         descriptions: "Iniciar sistema de registro de bases",
       },
       handler: this.registrationCommand,
