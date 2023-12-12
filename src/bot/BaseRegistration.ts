@@ -78,7 +78,7 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
         color: "Aqua",
         title: "Registro de bases",
         description:
-          "Você vai precisar de uma print do mapa com a localização da base, em seguida clique no botão **Registrar minha base**",
+          "Para registrar sua base clique no botão abaixo\nUm novo canal será aberto para registro da sua base\nEnvie um print do **MAPA** para que a administração possa aprovar sua base\n\nLembre-se leia as regras de base antes de construir clicando aqui https://discord.com/channels/642908198868746240/1141534644798504970 \n\nApós o registro acompanhe o canal de aprovação para ver se sua base foi aprovada - https://discord.com/channels/642908198868746240/1180608039749955614 \n\nBom jogo!",
       },
       [
         {
@@ -135,7 +135,7 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
       createEmbedCard({
         color: "Aqua",
         title: "Registro de Base",
-        description: "Envie uma print da localização",
+        description: "Envie uma print da localização da sua base (**PRINT DO MAPA**)",
       })
     );
 
@@ -144,6 +144,21 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
     });
 
     collector.on("collect", async (msg) => {
+
+      if (!msg.attachments.first()) {
+        this.report('Não consegui identificar a print', 'danger');
+
+        await message.edit(
+          createEmbedCard({
+            color: "Red",
+            title: "Registro de Base",
+            description:
+              "> Você precisa enviar um print do mapa com a localização da sua base",
+            footer: { text: `Envie somente 1 print` },
+          })
+        );
+        return;
+      }
       msg.delete();
       collector.stop();
       const fields: APIEmbedField[] = [
@@ -174,7 +189,7 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
           color: "Aqua",
           title: "Registro de Base",
           description:
-            "> Obrigado pela sua colaboração. O resultado estará disponível em breve",
+            "> Obrigado por registrar sua base. O resultado estará disponível em breve",
           footer: { text: `Esse canal será deletado em 30 segundos` },
         })
       );
@@ -200,7 +215,7 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
 
     const card = createEmbedCard({
       color: "Green",
-      description: "```Status: APROVADO```",
+      description: "```STATUS: APROVADO```",
       title: "Resultado de Registro de Base",
       imageUrl: attachment.url,
       fields: fields,
@@ -249,7 +264,7 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
       color: "Red",
       description: cardData.description,
       title:
-        "```Status: REJEITADO``` \n\n```Motivo: " +
+        "```STATUS: REJEITADO``` \n\n```Motivo: " +
         interaction.fields.getTextInputValue("motivo") +
         "```\n\n",
       imageUrl: attachment.url,
