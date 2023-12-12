@@ -1,0 +1,109 @@
+{
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            {
+                "scope": "comment.block.documentation",
+                "settings": {
+                    "fontStyle": "italic",
+                }
+            }
+        ]
+    },
+    "better-comments.tags": [
+        {
+            "tag": "!",
+            "color": "#FF2D00",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        },
+        {
+            "tag": "?",
+            "color": "#24EFC8",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        },
+        {
+            "tag": "//",
+            "color": "#474747",
+            "strikethrough": true,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        },
+        {
+            "tag": "todo",
+            "color": "#FF8C00",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        },
+        {
+            "tag": "*",
+            "color": "#98C379",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        },
+        {
+            "tag": "#",
+            "color": "#FF8C00",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        }
+    ],
+    "fileHeaderComment.parameter": {
+        "*": {
+            "commentbegin": "/*",
+            "commentseparator": "|-----------------------------------------------------------------------------",
+            "commentprefix": "|",
+            "commentend": "|*/",
+            "lead": "Jhonnata Paixão (Líder de Projeto)",
+            "project": "Linxsys - PHP CRM"
+        },
+        "CommentTitles": {
+            "commentbegin": "/*",
+            "commentseparator": "|-----------------------------------------------------------------------------",
+            "commentprefix": "|",
+            "commentend": "|*/",
+        },
+    },
+    "fileHeaderComment.template": {
+        "CommentTitles": [
+            "${commentbegin}",
+            "${commentseparator}",
+            "${commentprefix} ",
+            "${commentseparator}",
+            "${commentprefix}",
+            "${commentend}",
+        ],
+        "*": [
+            "${commentbegin}",
+            "${commentseparator}",
+            "${commentprefix} ${project}",
+            "${commentseparator}",
+            "${commentprefix}",
+            "${commentprefix} Desenvolvido por: ${lead}",
+            "${commentprefix} Iniciado em: 15/10/2022",
+            "${commentprefix} Arquivo: ${filename}",
+            "${commentprefix} Data da Criação ${date}",
+            "${commentprefix} Copyright (c) ${year}",
+            "${commentprefix}",
+            "${commentseparator}",
+            "${commentend}",
+        ]
+    },
+}
