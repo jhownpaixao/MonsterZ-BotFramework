@@ -5,6 +5,7 @@ import BotLoggerFunctions from "@app/facade/bot/BotLoggerFunctions";
 import createContentCard from "@utils/createContentCard";
 import createEmbedCard from "@utils/createEmbedCard";
 import { QuickDB } from "quick.db";
+import "dotenv/config";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -26,10 +27,10 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
   private events: EventHandler[] = [];
   private client: Client;
   private variables = {
-    baseRecordCategory: "1180687879748472872", // Categoria onde será criado o canal da solicitação
-    baseRegistrationChannel: "1180688039962492969", //Canal para o usuário solicitar o registro
-    baseRecordResultChannel: "1184113588391120896", // Canal que receberá os resultados de registro
-    baseRecordEvaluationChannel: "1184113497446031410", //Canal para aprovação pelos admins
+    baseRecordCategory: process.env.baseRecordCategory, // Categoria onde será criado o canal da solicitação
+    baseRegistrationChannel: process.env.baseRegistrationChannel, //Canal para o usuário solicitar o registro
+    baseRecordResultChannel: process.env.baseRecordResultChannel, // Canal que receberá os resultados de registro
+    baseRecordEvaluationChannel: process.env.baseRecordEvaluationChannel, //Canal para aprovação pelos admins
   };
 
   private resultChannel: TextChannel;

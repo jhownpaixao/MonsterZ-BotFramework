@@ -65,7 +65,6 @@ class ApplicationEngine extends Client {
     }
   }
   private async importCommandsToGuild() {
-    console.log("sss", this.commands);
     const api = new REST({ version: "9" }).setToken(this.accessToken);
 
     const commands = this.commands.map((command) => ({
