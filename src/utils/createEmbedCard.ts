@@ -1,5 +1,12 @@
 import { BodyCard, BtnCardList } from "@app/contracts/utils";
-import { ActionRowBuilder, ButtonBuilder, EmbedBuilder } from "discord.js";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  EmbedBuilder,
+  MessageCreateOptions,
+  MessagePayload,
+  RawFile,
+} from "discord.js";
 
 const createEmbedCard = (
   body: BodyCard | string,
@@ -14,7 +21,7 @@ const createEmbedCard = (
     result["content"] = body;
   } else {
     const embed = new EmbedBuilder().setColor(body.color).setTimestamp();
-    
+
     if (body.title) embed.setTitle(body.title);
     if (body.description) embed.setDescription(body.description);
     if (body.footer) embed.setFooter(body.footer);

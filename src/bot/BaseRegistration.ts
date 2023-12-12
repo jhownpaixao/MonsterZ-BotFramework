@@ -7,6 +7,7 @@ import createEmbedCard from "@utils/createEmbedCard";
 import { QuickDB } from "quick.db";
 import "dotenv/config";
 import {
+  APIEmbedField,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonInteraction,
@@ -17,7 +18,12 @@ import {
   Client,
   Interaction,
   Message,
+  ModalBuilder,
+  ModalSubmitInteraction,
   TextChannel,
+  TextInputBuilder,
+  TextInputComponent,
+  TextInputStyle,
 } from "discord.js";
 
 class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
@@ -140,24 +146,24 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
     collector.on("collect", async (msg) => {
       msg.delete();
       collector.stop();
-
-      this.eventSendToEvaluationChannel(msg);
+      const fields: APIEmbedField[] = [
+        {
+          name: "**Informações Adicionais:**",
+          value: msg.content || "**Sem informações**",
+        },
+        {
+          name: "**Solicitante:**",
+          value: `<@${interaction.user.id}>`,
+        },
+      ];
+      this.eventSendToEvaluationChannel(msg, fields);
 
       const card = createEmbedCard({
         color: "Yellow",
         description: "```Status: PENDENTE```",
         title: "Registro de Base",
         imageUrl: msg.attachments.first().url,
-        fields: [
-          {
-            name: "**Informações Adicionais:**",
-            value: msg.content || "**Sem informações**",
-          },
-          {
-            name: "**Solicitante:**",
-            value: `<@${interaction.user.id}>`,
-          },
-        ],
+        fields,
       });
 
       const resultChannelMessage = await this.resultChannel.send(card);
@@ -176,7 +182,10 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
       setTimeout(() => requestChannel.delete(), 30000);
     });
   };
-  registrationAnalysisEvent: EventCallback = async (client, interaction) => {
+  registrationAnalysisEventApprove: EventCallback = async (
+    client,
+    interaction
+  ) => {
     await interaction.deferReply({ ephemeral: true });
     await interaction.deleteReply();
 
@@ -189,26 +198,12 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
       result: "",
     };
 
-    switch (interaction.customId) {
-      case "base.registration.request.approve":
-        cardData.color = "Green";
-        cardData.description = "```O registro de base foi aprovado```";
-        cardData.result = "APROVADO";
-        break;
-
-      case "base.registration.request.approve":
-        cardData.color = "Red";
-        cardData.description = "```O registro de base foi rejeitado```";
-        cardData.result = "REJEITADO";
-        break;
-    }
-
     const card = createEmbedCard({
-      color: cardData.color,
-      description: cardData.description,
+      color: "Green",
+      description: "```Status: APROVADO```",
       title: "Resultado de Registro de Base",
       imageUrl: attachment.url,
-      fields: [{ name: "**Informações Adicionais:**", value: "sss" }],
+      fields: fields,
     });
 
     this.resultChannel.send(card);
@@ -231,23 +226,86 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
     await interaction.message.edit({ components: [buttonsRow] });
     const rMid = await this.database.get(interaction.user.id);
     const resultMessage = await this.resultChannel.messages.fetch(rMid);
-    const newCard = createEmbedCard({
-      color: cardData.color,
-      description: "```Status: " + cardData.result + "```",
-      title: "Registro de Base",
-      imageUrl: resultMessage.attachments.first()?.url,
-      fields: [
-        {
-          name: "**Informações Adicionais:**",
-          value: resultMessage.content || "**Sem informações**",
-        },
-      ],
+    resultMessage.delete();
+  };
+  registrationAnalysisEventReject: EventCallback = async (
+    client,
+    interaction
+  ) => {
+    if (!interaction.isModalSubmit()) return;
+    await interaction.deferReply({ ephemeral: true });
+    await interaction.deleteReply();
+
+    const fields = interaction.message.embeds[0].fields;
+    const attachment = interaction.message.embeds[0].image;
+
+    const cardData = {
+      color: "",
+      description: "",
+      result: "",
+    };
+
+    const card = createEmbedCard({
+      color: "Red",
+      description: cardData.description,
+      title:
+        "```Status: REJEITADO``` \n\n```Motivo: " +
+        interaction.fields.getTextInputValue("motivo") +
+        "```\n\n",
+      imageUrl: attachment.url,
+      fields: [...fields, { name: "\n\n", value: "\n" }],
     });
-    resultMessage.edit(newCard);
+
+    this.resultChannel.send(card);
+
+    const approvalButton = new ButtonBuilder()
+      .setCustomId("base.registration.request.approve")
+      .setLabel("Aprovar")
+      .setStyle(ButtonStyle.Success)
+      .setDisabled(true);
+    const rejectButton = new ButtonBuilder()
+      .setCustomId("base.registration.request.reject")
+      .setLabel("Rejeitar")
+      .setStyle(ButtonStyle.Danger)
+      .setDisabled(true);
+    const buttonsRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      approvalButton,
+      rejectButton
+    );
+
+    await interaction.message.edit({ components: [buttonsRow] });
+    const rMid = await this.database.get(interaction.user.id);
+    const resultMessage = await this.resultChannel.messages.fetch(rMid);
+    resultMessage.delete();
+  };
+  registrationAnalysisEventRejectModal: EventCallback = async (
+    client,
+    interaction
+  ) => {
+    if (!interaction.isButton()) return;
+    const modal = new ModalBuilder()
+      .setCustomId("base.registration.request.reject")
+      .setTitle("Motivo da Rejeição");
+
+    const textInput = new TextInputBuilder()
+      .setCustomId("motivo")
+      .setLabel("Qual o motivo da reprovação?")
+      .setPlaceholder("Responda aqui")
+      .setRequired(true)
+      .setStyle(TextInputStyle.Short);
+
+    const row = new ActionRowBuilder<TextInputBuilder>().addComponents(
+      textInput
+    );
+    modal.addComponents(row);
+    interaction.showModal(modal);
   };
 
   // ?Private utils functions
-  private eventSendToEvaluationChannel = async (content: Message<boolean>) => {
+  private eventSendToEvaluationChannel = async (
+    content: Message<boolean>,
+    fields: APIEmbedField[]
+  ) => {
     const attachment = content.attachments.first();
 
     await this.evaluationChannel.send(
@@ -256,9 +314,7 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
           color: "Yellow",
           title: "Solicitação de registro de base",
           imageUrl: attachment.url,
-          fields: [
-            { name: "**Informações Adicionais:**", value: content.channelId },
-          ],
+          fields,
         },
         [
           {
@@ -269,14 +325,16 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
           {
             label: "Reprovar",
             style: ButtonStyle.Danger,
-            id: "base.registration.request.reject",
+            id: "base.registration.request.reject.modal",
           },
         ]
       )
     );
   };
   private eventCreateRequestChannel = async (
-    interaction: ButtonInteraction<CacheType>
+    interaction:
+      | ButtonInteraction<CacheType>
+      | ModalSubmitInteraction<CacheType>
   ) => {
     return await interaction.guild.channels.create({
       name: `registro-base-${interaction.user.displayName}`,
@@ -360,12 +418,16 @@ class BaseRegistration extends BotLoggerFunctions implements DiscordBot {
         handler: this.registrationEvent,
       },
       {
+        name: "base.registration.request.reject.modal",
+        handler: this.registrationAnalysisEventRejectModal,
+      },
+      {
         name: "base.registration.request.reject",
-        handler: this.registrationAnalysisEvent,
+        handler: this.registrationAnalysisEventReject,
       },
       {
         name: "base.registration.request.approve",
-        handler: this.registrationAnalysisEvent,
+        handler: this.registrationAnalysisEventApprove,
       }
     );
 

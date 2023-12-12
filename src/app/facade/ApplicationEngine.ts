@@ -121,7 +121,7 @@ class ApplicationEngine extends Client {
         return;
       }
 
-      if (interaction.isButton()) {
+      if (interaction.isButton() || interaction.isModalSubmit()) {
         const name = interaction.customId;
         const event = this.events.find((event) => event.name === name);
 
